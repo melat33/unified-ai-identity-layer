@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-navy:       #0A1628;
+    --color-navy-800:   #0F2040;
+    --color-navy-700:   #152952;
+
+    --color-teal:       #00C9A7;
+    --color-teal-dark:  #00A88A;
+    --color-teal-faint: #E6FAF7;
+
+    --color-surface:    #F8FAFF;
+
+    --color-success:    #10B981;
+    --color-warning:    #F59E0B;
+    --color-danger:     #EF4444;
+    --color-border:     #E2E8F0;
+
+    --header-height:    72px;
+    --sidebar-width:    224px;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface font-sans;
+    color: var(--color-navy);
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+    color: var(--color-navy);
+  }
+
+  code, pre {
+    @apply font-mono;
+  }
+
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+}
+
+@layer components {
+
+  /* ── Layout ─────────────────────────────────── */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* ── Cards ──────────────────────────────────── */
+  .card {
+    @apply bg-white rounded-2xl border border-border shadow-sm;
+  }
+
+  /* ── Buttons ────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-medium transition-all duration-200;
+    background: var(--color-teal);
+    color: var(--color-navy);
+  }
+  .btn-primary:hover {
+    background: var(--color-teal-dark);
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-medium transition-all duration-200;
+    background: var(--color-navy);
+    color: white;
+  }
+  .btn-dark:hover   { background: var(--color-navy-800); }
+  .btn-dark:active  { transform: scale(0.97); }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-5 py-3 font-medium transition-all duration-200 hover:bg-slate-50;
+    color: var(--color-navy);
+  }
+  .btn-outline:active { transform: scale(0.97); }
+
+  /* ── Form inputs ─────────────────────────────── */
+  .input-field {
+    @apply w-full rounded-xl border border-border bg-white px-4 py-3 text-sm outline-none transition-all;
+    color: var(--color-navy);
+  }
+  .input-field:focus {
+    border-color: var(--color-teal);
+    box-shadow: 0 0 0 3px rgba(0, 201, 167, 0.15);
+  }
+  .input-field::placeholder {
+    color: #94A3B8;
+  }
+  .input-field.error {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+  }
+
+  /* ── Sidebar navigation ──────────────────────── */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all;
+    color: #94A3B8;
+  }
+  .sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: white;
+  }
+  .sidebar-link.active {
+    background: rgba(0, 201, 167, 0.15);
+    color: var(--color-teal);
+  }
+
+  /* ── FAN badge ───────────────────────────────── */
+  .fan-badge {
+    @apply font-mono text-sm px-4 py-2 rounded-xl tracking-widest;
+    background: var(--color-navy);
+    color: var(--color-teal);
+    letter-spacing: 0.16em;
+  }
+
+  /* ── Status badges ───────────────────────────── */
+  .badge-verified {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium;
+    background: var(--color-teal-faint);
+    color: var(--color-teal-dark);
+  }
+  .badge-pending {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700;
+  }
+  .badge-rejected {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50;
+    color: var(--color-danger);
+  }
+
+  /* ── Camera UI ───────────────────────────────── */
+  .camera-wrap {
+    @apply relative overflow-hidden rounded-2xl;
+    background: var(--color-navy);
+    aspect-ratio: 4 / 3;
+  }
+
+  .camera-guide-doc {
+    position: absolute;
+    inset: 10%;
+    border-radius: 10px;
+    border: 2px solid rgba(0, 201, 167, 0.75);
+    box-shadow: 0 0 0 9999px rgba(10, 22, 40, 0.55);
+    pointer-events: none;
+  }
+
+  .camera-corner {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: var(--color-teal);
+    border-style: solid;
+    border-width: 0;
+  }
+  .camera-corner.tl { top: -1px; left: -1px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 4px; }
+  .camera-corner.tr { top: -1px; right: -1px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 4px; }
+  .camera-corner.bl { bottom: -1px; left: -1px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 4px; }
+  .camera-corner.br { bottom: -1px; right: -1px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 4px; }
+
+  .scan-line {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-teal), transparent);
+    box-shadow: 0 0 8px var(--color-teal);
+    @apply animate-scanLine;
+    pointer-events: none;
+  }
+
+  .face-oval {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56%;
+    aspect-ratio: 3 / 4;
+    border-radius: 50%;
+    border: 2.5px solid rgba(0, 201, 167, 0.8);
+    box-shadow: 0 0 0 9999px rgba(10, 22, 40, 0.52);
+    pointer-events: none;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--color-teal);
+    @apply animate-pulseRing;
+  }
+
+  /* ── Quality dot ─────────────────────────────── */
+  .quality-pill {
+    @apply flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium;
+    background: rgba(10, 22, 40, 0.72);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: white;
+  }
+
+  /* ── Page transitions ────────────────────────── */
+  .page-enter { @apply animate-slideUp; }
+  .fade-enter { @apply animate-fadeIn; }
+}
