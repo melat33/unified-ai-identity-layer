@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment files
+.env
+.env.local
+
+# AI model cache
+model_cache/
+
+# Test outputs
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

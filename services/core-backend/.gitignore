@@ -1,0 +1,4 @@
+node_modules
+keys/private.pem
+keys/public.jwk.json
+.env
