@@ -1,0 +1,42 @@
+# ── Web framework ───────────────────────────────────────────
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+python-multipart==0.0.9
+
+# ── Core numerical stack — pinned to avoid conflicts ───────
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+Pillow==10.4.0
+protobuf==3.20.2
+
+# ── OCR — PaddleOCR (CPU build) ─────────────────────────────
+paddlepaddle==2.6.2
+paddleocr==2.8.1
+
+# ── Face recognition — InsightFace (ArcFace R100) ───────────
+insightface==0.7.3
+onnxruntime==1.19.2
+
+# ── Liveness — MediaPipe Face Mesh ──────────────────────────
+mediapipe==0.10.11
+
+# ── Fraud scoring — XGBoost ──────────────────────────────────
+xgboost==2.1.1
+scikit-learn==1.5.2
+joblib==1.4.2
+
+# ── NLP cross-validation (OCR vs form input) ────────────────
+spacy==3.7.6
+
+# ── Storage client — MinIO ───────────────────────────────────
+minio==7.2.8
+
+# ── JWT signing ───────────────────────────────────────────────
+PyJWT==2.9.0
+cryptography==43.0.1
+
+# ── Dev / testing ─────────────────────────────────────────────
+pytest==8.3.3
+httpx==0.27.2
+
