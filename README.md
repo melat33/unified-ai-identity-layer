@@ -73,10 +73,35 @@ A user verifies their identity with their **Fayda National ID** and a **live bio
 
 ## 📸 Screenshots
 
-### Landing Page
-![Landing](https://uail-web.vercel.app/og-landing.png)
-> *"Verify once. Trust everywhere." — AI-driven identity infrastructure for Ethiopia*
+### Landing Page — "Verify once. Trust everywhere."
+![Landing](docs/screenshots/01-landing.png)
 
+### Step 1 — Identity Verification Start
+![Start](docs/screenshots/02-verification-start.png)
+
+### Step 2 — Document Capture (PaddleOCR processing Fayda ID)
+![Document](docs/screenshots/03-document.png)
+
+### Step 3 — Liveness Verification (MediaPipe Face Mesh EAR blink detection)
+![Liveness](docs/screenshots/04-liveness.png)
+
+### Step 4 — Review Extracted Information
+![Review](docs/screenshots/05-review.png)
+
+### Step 5 — Running Biometric Verification (ArcFace R100 pipeline)
+![Running](docs/screenshots/06-running.png)
+
+### Step 6 — Identity Verification Complete (IAL2 issued, FAN generated)
+![Complete](docs/screenshots/07-complete.png)
+
+### SSO — UAIL Consent Screen (OAuth 2.0 / OIDC)
+![Consent](docs/screenshots/08-consent.png)
+
+### NeoBirr — Merchant Demo Landing
+![NeoBirr Landing](docs/screenshots/09-neobirr-landing.png)
+
+### NeoBirr — Verified Profile via UAIL SSO
+![NeoBirr Callback](docs/screenshots/10-neobirr-callback.png)
 ### Identity Verification Flow
 
 | Step | Screenshot |
