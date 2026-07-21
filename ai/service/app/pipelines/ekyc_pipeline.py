@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Optional
 
 from app.processors.image_processor    import preprocess
 from app.processors.ocr_processor      import extract_id_fields
@@ -13,36 +14,15 @@ logger = logging.getLogger(__name__)
 def run_ekyc(
     doc_image_bytes: bytes,
     selfie_bytes:    bytes,
-    ear_log:         list[float],
+    ear_log:         list,
     challenge_type:  str,
+    cached_ocr:      Optional[dict] = None,
 ) -> dict:
     """
-    End-to-end eKYC pipeline.
+    7-step eKYC pipeline.
 
-    Flow:
-        1. Document quality assessment and preprocessing
-        2. OCR field extraction
-        3. Document face embedding (from ID photo)
-        4. Selfie face embedding (from live capture)
-        5. Face comparison — cosine similarity vs threshold
-        6. Liveness verification — EAR log + selfie face detection
-        7. Final decision — kyc_passed = face_match AND liveness_passed
-
-    Each step is independently guarded. A failure sets result["error"]
-    and returns early so the caller always receives a well-formed dict.
-
-    Returns:
-        {
-            kyc_passed:      bool,
-            face_similarity: float,
-            face_match:      bool,
-            liveness_passed: bool,
-            liveness_reason: str,
-            blink_count:     int,
-            det_score:       float,
-            ocr_fields:      dict,
-            error:           str | None
-        }
+    cached_ocr: if OCR was already run at document capture time,
+    pass those fields here to skip re-running OCR (saves 15-30 seconds).
     """
     result = {
         "kyc_passed":      False,
@@ -56,60 +36,81 @@ def run_ekyc(
         "error":           None,
     }
 
-    # ── Step 1: Image preprocessing ───────────────────────────────────
+    # ── Step 1: Preprocess document ───────────────────────────────────
     try:
-        corrected_doc_bytes = preprocess(doc_image_bytes)
-        logger.info("Step 1 complete: document preprocessed.")
+        corrected_doc = preprocess(doc_image_bytes)
+        logger.info("Step 1 ✓ document preprocessed (%d bytes)", len(corrected_doc))
     except Exception as e:
-        logger.error("Step 1 failed: %s", e)
+        logger.error("Step 1 ✗ preprocessing failed: %s", e)
         result["error"] = f"Image preprocessing failed: {e}"
         return result
 
-    # ── Step 2: OCR field extraction ──────────────────────────────────
-    try:
-        ocr_fields = extract_id_fields(corrected_doc_bytes)
-        result["ocr_fields"] = ocr_fields
-        logger.info("Step 2 complete: OCR extracted %d fields.",
-                    sum(1 for v in ocr_fields.values() if v and isinstance(v, str)))
-    except Exception as e:
-        logger.error("Step 2 failed: %s", e)
-        result["error"] = f"OCR extraction failed: {e}"
-        return result
+    # ── Step 2: OCR — skip if cached fields available ─────────────────
+    cached_has_data = (
+        cached_ocr and
+        isinstance(cached_ocr, dict) and
+        any(v for v in cached_ocr.values() if v)
+    )
+
+    if cached_has_data:
+        result["ocr_fields"] = cached_ocr
+        logger.info(
+            "Step 2 ✓ using cached OCR — skipping re-extraction  name=%s",
+            cached_ocr.get("name")
+        )
+    else:
+        try:
+            ocr_fields = extract_id_fields(corrected_doc)
+            result["ocr_fields"] = ocr_fields
+            logger.info(
+                "Step 2 ✓ OCR extraction complete  name=%s  id=%s",
+                ocr_fields.get("name"),
+                ocr_fields.get("id_number")
+            )
+        except Exception as e:
+            logger.error("Step 2 ✗ OCR failed: %s", e)
+            result["error"] = f"OCR extraction failed: {e}"
+            return result
 
     # ── Step 3: Document face embedding ───────────────────────────────
+    # is_document=True → selects LARGEST face (main ID photo, not thumbnail)
     try:
-        doc_result = extract_embedding(corrected_doc_bytes)
-        logger.info("Step 3 complete: doc face det_score=%.3f.", doc_result.det_score)
+        doc_face = extract_embedding(corrected_doc, is_document=True)
+        logger.info(
+            "Step 3 ✓ document face  det_score=%.3f  faces=%d",
+            doc_face.det_score, doc_face.face_count
+        )
     except Exception as e:
-        logger.error("Step 3 failed: %s", e)
+        logger.error("Step 3 ✗ document face extraction failed: %s", e)
         result["error"] = f"Document face extraction failed: {e}"
         return result
 
     # ── Step 4: Selfie face embedding ─────────────────────────────────
+    # is_document=False → selects highest-confidence face
     try:
-        selfie_result = extract_embedding(selfie_bytes)
-        logger.info("Step 4 complete: selfie face det_score=%.3f.", selfie_result.det_score)
+        selfie_face = extract_embedding(selfie_bytes, is_document=False)
+        logger.info(
+            "Step 4 ✓ selfie face  det_score=%.3f",
+            selfie_face.det_score
+        )
     except Exception as e:
-        logger.error("Step 4 failed: %s", e)
+        logger.error("Step 4 ✗ selfie face extraction failed: %s", e)
         result["error"] = f"Selfie face extraction failed: {e}"
         return result
 
     # ── Step 5: Face comparison ───────────────────────────────────────
     try:
-        face_cmp = compare_embeddings(
-            doc_result.embedding,
-            selfie_result.embedding
-        )
-        result["face_similarity"] = face_cmp["similarity"]
-        result["face_match"]      = face_cmp["match"]
+        comparison = compare_embeddings(doc_face.embedding, selfie_face.embedding)
+        result["face_similarity"] = comparison["similarity"]
+        result["face_match"]      = comparison["match"]
         logger.info(
-            "Step 5 complete: similarity=%.4f match=%s threshold=%.2f.",
-            face_cmp["similarity"],
-            face_cmp["match"],
-            face_cmp["threshold"]
+            "Step 5 ✓ similarity=%.4f  threshold=%.2f  match=%s",
+            comparison["similarity"],
+            comparison["threshold"],
+            comparison["match"]
         )
     except Exception as e:
-        logger.error("Step 5 failed: %s", e)
+        logger.error("Step 5 ✗ face comparison failed: %s", e)
         result["error"] = f"Face comparison failed: {e}"
         return result
 
@@ -125,13 +126,13 @@ def run_ekyc(
         result["blink_count"]     = liveness["blink_count"]
         result["det_score"]       = liveness["det_score"]
         logger.info(
-            "Step 6 complete: liveness=%s blinks=%d det_score=%.3f.",
+            "Step 6 ✓ liveness=%s  blinks=%d  reason=%s",
             liveness["passed"],
             liveness["blink_count"],
-            liveness["det_score"]
+            liveness["reason"]
         )
     except Exception as e:
-        logger.error("Step 6 failed: %s", e)
+        logger.error("Step 6 ✗ liveness failed: %s", e)
         result["error"] = f"Liveness verification failed: {e}"
         return result
 
@@ -139,9 +140,9 @@ def run_ekyc(
     result["kyc_passed"] = result["face_match"] and result["liveness_passed"]
 
     logger.info(
-        "eKYC pipeline complete: kyc_passed=%s face_match=%s liveness=%s.",
+        "Pipeline complete ✓  kyc_passed=%s  similarity=%.4f  liveness=%s",
         result["kyc_passed"],
-        result["face_match"],
+        result["face_similarity"],
         result["liveness_passed"]
     )
 
