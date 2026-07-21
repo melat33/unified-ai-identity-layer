@@ -1,75 +1,39 @@
+from pydantic_settings import BaseSettings
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """
-    Central configuration for the UAIL AI Service.
+    PORT:    int = 8001
+    HOST:    str = "0.0.0.0"
+    WORKERS: int = 1
 
-    Values are loaded from environment variables and/or a .env file.
-    Every other module imports `settings` from here and never
-    hardcodes a tunable value directly.
-    """
+    AI_SERVICE_URL: str = "http://localhost:8001"
 
-    # ------------------------------------------------------------------
-    # Server Settings
-    # ------------------------------------------------------------------
-    APP_NAME: str = "UAIL AI Service"
-    HOST: str = "0.0.0.0"
-    PORT: int = 8001
-
-    # ------------------------------------------------------------------
-    # AI Model Thresholds
-    # ------------------------------------------------------------------
+    # Face matching — 0.55 for cross-domain ID photo vs live selfie
     FACE_MATCH_THRESHOLD: float = Field(
-        default=0.85,
-        description="Minimum cosine similarity required for a successful face match."
+        default=0.55,
+        description="Cosine similarity threshold for ID photo vs live selfie."
     )
 
+    # Liveness — EAR below this = eye closed = blink registered
     LIVENESS_EAR_THRESHOLD: float = Field(
-        default=0.20,
-        description="Eye Aspect Ratio threshold used for blink detection."
+        default=0.25,
+        description="Eye aspect ratio threshold for blink detection."
     )
 
-    LIVENESS_BLINKS_REQUIRED: int = Field(
-        default=2,
-        description="Minimum number of valid blinks required."
+    # Minimum blinks required to pass liveness
+    LIVENESS_MIN_BLINKS: int = Field(
+        default=1,
+        description="Minimum blink count to pass liveness challenge."
     )
 
-    LIVENESS_TIMEOUT_SECONDS: int = Field(
-        default=12,
-        description="Maximum duration of the liveness challenge."
-    )
-
-    DOC_QUALITY_MIN_BRIGHTNESS: int = Field(
-        default=80,
-        description="Minimum average brightness required for document capture."
-    )
-
-    # ------------------------------------------------------------------
-    # Model Paths
-    # ------------------------------------------------------------------
     MODEL_CACHE_DIR: str = "./model_cache"
-    XGBOOST_MODEL_PATH: str = "./model_cache/fraud_model.json"
+    JWT_SECRET:      str = "uail-dev-secret-change-in-production"
 
-    # ------------------------------------------------------------------
-    # MinIO Storage
-    # ------------------------------------------------------------------
-    MINIO_ENDPOINT: str = "localhost:9000"
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET: str = "uail-temp-kyc"
-
-    # ------------------------------------------------------------------
-    # Pydantic Settings Configuration
-    # ------------------------------------------------------------------
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore",
-    )
+    class Config:
+        env_file          = ".env"
+        env_file_encoding = "utf-8"
+        extra             = "ignore"
 
 
-# Singleton settings instance — import this everywhere else
 settings = Settings()
