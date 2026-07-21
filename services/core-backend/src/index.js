@@ -8,18 +8,23 @@ import identityRouter from "./routes/identity.js"
 const app = express()
 
 // ── Middleware ────────────────────────────────────────────────────────
-app.use(cors({ origin: "*" }))
-app.use(express.json({ limit: "50mb" }))  // base64 images are large
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://uail-web.vercel.app",
+    "https://neobirr-demo.vercel.app"
+  ],
+  credentials: true
+}))
+app.use(express.json({ limit: "50mb" }))
 app.use(express.urlencoded({ extended: true }))
 
 // ── Routes ────────────────────────────────────────────────────────────
 app.use("/api/v1/auth",     authRouter)
 app.use("/api/v1/ekyc",     ekycRouter)
 app.use("/api/v1/identity", identityRouter)
-
-// The /jwks endpoint is on the auth router but also exposed at root
-// so relying parties can find it at the standard location
-app.use("/jwks", authRouter)
+app.use("/jwks",            authRouter)
 
 // ── Root health ───────────────────────────────────────────────────────
 app.get("/", (req, res) => {
