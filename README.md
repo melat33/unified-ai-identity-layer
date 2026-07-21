@@ -478,9 +478,7 @@ Phase 5 (2026):     Verifiable credentials — W3C DID standard compliance
 ## 👩‍💻 Built By
 
 **Melat Tewachew Zemen**
-AI/ML Engineering · Kifiya AI Mastery Program (Completed with Distinction)
-Kifiya Inspire 3.0 · March 2025
-
+AI/ML Engineering · Kifiya 
 ---
 
 ## 📄 License
