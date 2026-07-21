@@ -1,11 +1,11 @@
-// KYC assurance levels — matches OIDC JWT acr claim values (NIST 800-63)
+// KYC assurance levels — matches OIDC JWT acr claim (NIST 800-63)
 export const KYC_LEVEL = {
   NONE: "none",
   IAL1: "ial1",
   IAL2: "ial2"
 }
 
-// Trust tiers — rank enables numeric comparison
+// Trust tiers with numeric rank for comparison
 export const TRUST_TIER = {
   UNVERIFIED: { label: "unverified", rank: 0 },
   BRONZE:     { label: "bronze",     rank: 1 },
@@ -14,7 +14,7 @@ export const TRUST_TIER = {
   PLATINUM:   { label: "platinum",   rank: 4 }
 }
 
-// eKYC verification lifecycle
+// eKYC session lifecycle
 export const VERIFICATION_STATUS = {
   NOT_STARTED:    "not_started",
   IN_PROGRESS:    "in_progress",
@@ -24,7 +24,7 @@ export const VERIFICATION_STATUS = {
   EXPIRED:        "expired"
 }
 
-// Fraud scoring output — how risky is this event
+// Fraud scoring output
 export const RISK_TIER = {
   LOW:      "low",
   MEDIUM:   "medium",
@@ -32,9 +32,9 @@ export const RISK_TIER = {
   CRITICAL: "critical"
 }
 
-// Transaction authorization decision — what action to take
+// Transaction authorization decision
 export const TRANSACTION_AUTH = {
-  SILENT:  "silent",   // approve automatically
-  PIN:     "pin",      // ask for PIN confirmation
-  STEP_UP: "step_up"  // require live biometric re-verification
+  SILENT:  "silent",
+  PIN:     "pin",
+  STEP_UP: "step_up"
 }
