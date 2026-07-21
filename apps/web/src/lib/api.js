@@ -2,7 +2,7 @@ import axios from "axios"
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
-  timeout: 30000
+  timeout: 120_000  // 2 minutes — OCR + face match on CPU takes time
 })
 
 api.interceptors.request.use(
@@ -11,11 +11,11 @@ api.interceptors.request.use(
       const persisted = localStorage.getItem("uail-auth")
       if (persisted) {
         const parsed = JSON.parse(persisted)
-        const token = parsed?.state?.token || parsed?.token || parsed?.accessToken
+        const token  = parsed?.state?.token || parsed?.token || parsed?.accessToken
         if (token) config.headers.Authorization = `Bearer ${token}`
       }
-    } catch (error) {
-      console.error("Failed to attach auth token:", error)
+    } catch {
+      // silent — missing token means unauthenticated request
     }
     return config
   },
@@ -24,18 +24,18 @@ api.interceptors.request.use(
 
 export const authAPI = {
   register: (body) => api.post("/auth/register", body),
-  login:    (body) => api.post("/auth/login", body),
+  login:    (body) => api.post("/auth/login",    body),
   refresh:  ()     => api.post("/auth/refresh")
 }
 
 export const ekycAPI = {
-  startSession: () => api.post("/ekyc/session"),
-  submitFrame:  (sessionId, frameB64) => api.post(`/ekyc/${sessionId}/frame`, { frame: frameB64 }),
-  captureDoc:   (sessionId, frameB64) => api.post(`/ekyc/${sessionId}/document`, { frame: frameB64 }),
-  getChallenge: (sessionId) => api.get(`/ekyc/${sessionId}/challenge`),
+  startSession:   ()                              => api.post("/ekyc/session"),
+  captureDoc:     (sessionId, frameB64)           => api.post(`/ekyc/${sessionId}/document`,  { frame: frameB64 }),
+  getChallenge:   (sessionId)                     => api.get(`/ekyc/${sessionId}/challenge`),
   verifyLiveness: (sessionId, selfie, earLog, challengeType) =>
     api.post(`/ekyc/${sessionId}/liveness`, { selfie, ear_log: earLog, challenge_type: challengeType }),
-  attest: (sessionId) => api.post(`/ekyc/${sessionId}/attest`)
+  attest:         (sessionId)                     => api.post(`/ekyc/${sessionId}/attest`),
+  getStatus:      (sessionId)                     => api.get(`/ekyc/${sessionId}/status`)
 }
 
 export const identityAPI = {
